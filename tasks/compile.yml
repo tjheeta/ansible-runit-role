@@ -36,7 +36,7 @@
          cd admin/runit-2.1.2 &&
          echo "{{ runit_build }}/dest/bin/musl-gcc -O2 -Wall -static" > ./src/conf-cc &&
          echo "{{ runit_build }}/dest/bin/musl-gcc -s -static" > ./src/conf-ld &&
-         package/install &&
+         package/compile &&
          package/check &&
          cd command && 
          tar zcpf {{ runit_build }}/runit-{{ ansible_architecture }}.tar.gz . &&

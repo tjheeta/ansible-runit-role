@@ -1,0 +1,4 @@
+start on runlevel [12345]
+respawn
+stop on shutdown
+exec {{ runit_binary_dir}}/runsvdir-start
