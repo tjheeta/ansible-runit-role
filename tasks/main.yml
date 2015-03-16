@@ -1,0 +1,15 @@
+- file: path={{ runit_binary_dir }} mode=0755 state=directory
+- file: path={{ runit_service_dir }} mode=0755 state=directory
+
+# assumes that the localhost has a compiler to make runit statically
+- include: compile.yml
+  when: not runit_use_precompiled_binary
+
+- unarchive: src={{ runit_build }}/runit-{{ ansible_architecture }}.tar.gz dest={{ runit_binary_dir }} mode=0755
+  when: not runit_use_precompiled_binary
+- unarchive: src=runit-{{ ansible_architecture }}.tar.gz dest={{ runit_binary_dir }} mode=0755
+  when: runit_use_precompiled_binary
+
+# Have to setup the runit startup
+- template: dest={{ runit_binary_dir }}/runsvdir-start src=runsvdir-start.j2 mode=0755
+- lineinfile: dest=/etc/rc.local regexp='runsvdir-start' insertafter=EOF line="sh -cf '{{ runit_binary_dir }}/runsvdir-start' &"

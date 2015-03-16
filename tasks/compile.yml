@@ -1,0 +1,48 @@
+- file: path={{ runit_build }}/src/ recurse=true state=directory
+  delegate_to: localhost
+  run_once: true
+- file: path={{ runit_build }}/build/ recurse=true state=directory
+  delegate_to: localhost
+  run_once: true
+- file: path={{ runit_build }}/dest/ recurse=true state=directory
+  delegate_to: localhost
+  run_once: true
+
+- get_url: url=http://www.musl-libc.org/releases/musl-1.1.6.tar.gz dest={{ runit_build }}/src/musl-1.1.6.tar.gz
+           sha256sum="5a0160c55c540d5b90158617a57647f1b03209f58d9ee70dbce19d1115b4f1b4"
+  run_once: true
+- get_url: url=http://smarden.org/runit/runit-2.1.2.tar.gz dest={{ runit_build }}/src/runit-2.1.2.tar.gz
+           sha256sum="6fd0160cb0cf1207de4e66754b6d39750cff14bb0aa66ab49490992c0c47ba18"
+  run_once: true
+  delegate_to: localhost
+
+- shell: |
+         cd {{ runit_build }}/build && 
+         rm -rf musl-1.1.6 && 
+         tar zxf {{ runit_build }}/src/musl-1.1.6.tar.gz &&
+         cd musl-1.1.6 &&
+         ./configure --prefix={{ runit_build }}/dest/ &&
+         make install &&
+         touch "{{ runit_build }}/src/musl.built"
+  args:
+    creates: "{{ runit_build }}/src/musl.built"
+  run_once: true
+  delegate_to: localhost
+
+- shell: |
+         cd {{ runit_build }}/build && 
+         rm -rf admin && 
+         tar zxf {{ runit_build }}/src/runit-2.1.2.tar.gz &&
+         cd admin/runit-2.1.2 &&
+         echo "{{ runit_build }}/dest/bin/musl-gcc -O2 -Wall -static" > ./src/conf-cc &&
+         echo "{{ runit_build }}/dest/bin/musl-gcc -s -static" > ./src/conf-ld &&
+         package/install &&
+         package/check &&
+         cd command && 
+         tar zcpf {{ runit_build }}/runit-{{ ansible_architecture }}.tar.gz . &&
+         touch "{{ runit_build }}/src/runit.built"
+  args:
+    creates: "{{ runit_build }}/src/runit.built"
+  run_once: true
+  delegate_to: localhost
+
