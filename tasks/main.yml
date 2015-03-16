@@ -7,8 +7,10 @@
   sudo: false
 
 - unarchive: src={{ runit_build }}/runit-{{ ansible_architecture }}.tar.gz dest={{ runit_binary_dir }} mode=0755
+             creates={{ runit_binary_dir }}/runsv
   when: not runit_use_precompiled_binary
 - unarchive: src=runit-{{ ansible_architecture }}.tar.gz dest={{ runit_binary_dir }} mode=0755
+             creates={{ runit_binary_dir }}/runsv
   when: runit_use_precompiled_binary
 - file: path={{ runit_binary_dir }}/{{ item }} mode=0755 owner=root group=root
   with_items:
@@ -23,7 +25,7 @@
     - utmpset
 
 # Have to setup the runit startup
-- template: dest={{ runit_binary_dir }}/runsvdir-start src=upstart-runsvdir-start.j2 mode=0755
+- template: dest={{ runit_binary_dir }}/runsvdir-start src=runsvdir-start.j2 mode=0755
 
 # Check if it's upstart - /etc/init/
 - stat: path=/etc/init get_md5=no get_checksum=no
