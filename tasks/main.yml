@@ -34,19 +34,23 @@
 - template: dest=/etc/init/runsvdir-start.conf src=upstart-runsvdir-start.conf.j2
   when: st.stat.isdir
   tags: startup
-- shell: start runsvdir-start
+- service: name=runsvdir-start state=started
   sudo: true
   when: st.stat.isdir
   tags: startup
 
-#- lineinfile: dest=/etc/rc.local regexp='runsvdir-start' insertafter=EOF line="sh -cf '{{ runit_binary_dir }}/runsvdir-start' &"
+- lineinfile: dest=/etc/rc.local regexp='runsvdir-start' insertafter=EOF line="sh -cf '{{ runit_binary_dir }}/runsvdir-start' &"
+  when: not st.stat.isdir
+  tags: startup
 
-#- shell: pgrep runsvdir-start 
-#  register: pgrep_status
-#  ignore_errors: true
-#  tags: test
+- shell: pgrep runsvdir-start 
+  register: pgrep_status
+  ignore_errors: true
+  when: not st.stat.isdir
+  tags: startup
 
-#- debug: var=pgrep_status
+- debug: var=pgrep_status
+  tags: startup
 
 #- shell: |
 #         setsid "{{ runit_binary_dir }}/runsvdir-start"
