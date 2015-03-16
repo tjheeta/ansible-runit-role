@@ -4,6 +4,7 @@
 # assumes that the localhost has a compiler to make runit statically
 - include: compile.yml
   when: not runit_use_precompiled_binary
+  sudo: false
 
 - unarchive: src={{ runit_build }}/runit-{{ ansible_architecture }}.tar.gz dest={{ runit_binary_dir }} mode=0755
   when: not runit_use_precompiled_binary
