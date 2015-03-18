@@ -12,17 +12,7 @@
 - unarchive: src=runit-{{ ansible_architecture }}.tar.gz dest={{ runit_binary_dir }} mode=0755
              creates={{ runit_binary_dir }}/runsv
   when: runit_use_precompiled_binary
-- file: path={{ runit_binary_dir }}/{{ item }} mode=0755 owner=root group=root
-  with_items:
-    - chpst
-    - runit
-    - runit-init
-    - runsv
-    - runsvchdir
-    - runsvdir
-    - sv
-    - svlogd
-    - utmpset
+- shell: cd {{ runit_binary_dir }} && chown root:root chpst runit runit-init runsv runsvchdir runsvdir runsvdir-start sv svlogd utmpset
 
 # Have to setup the runit startup
 - template: dest={{ runit_binary_dir }}/runsvdir-start src=runsvdir-start.j2 mode=0755
