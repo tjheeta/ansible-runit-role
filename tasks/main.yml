@@ -12,10 +12,10 @@
 - unarchive: src=runit-{{ ansible_architecture }}.tar.gz dest={{ runit_binary_dir }} mode=0755
              creates={{ runit_binary_dir }}/runsv
   when: runit_use_precompiled_binary
-- shell: cd {{ runit_binary_dir }} && chown root:root chpst runit runit-init runsv runsvchdir runsvdir runsvdir-start sv svlogd utmpset
 
 # Have to setup the runit startup
 - template: dest={{ runit_binary_dir }}/runsvdir-start src=runsvdir-start.j2 mode=0755
+- shell: cd {{ runit_binary_dir }} && chown root:root chpst runit runit-init runsv runsvchdir runsvdir runsvdir-start sv svlogd utmpset
 
 # Check if it's upstart - /etc/init/
 - stat: path=/etc/init get_md5=no get_checksum=no
