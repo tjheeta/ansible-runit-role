@@ -1,5 +1,8 @@
 - file: path={{ runit_binary_dir }} mode=0755 state=directory
 - file: path={{ runit_service_dir }} mode=0755 state=directory
+- file: path={{ runit_sv_dir }} mode=0755 state=directory
+- file: dest=/service src={{ runit_service_dir }} state=link
+  when: runit_service_dir != "/service"
 
 # assumes that the localhost has a compiler to make runit statically
 - include: compile.yml

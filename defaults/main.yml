@@ -3,3 +3,4 @@ runit_build: /tmp/tmp_ansible_build/
 runit_use_precompiled_binary: false
 runit_binary_dir: /usr/local/bin/
 runit_service_dir: /etc/service/
+runit_sv_dir: /etc/sv/
