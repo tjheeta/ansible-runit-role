@@ -12,10 +12,13 @@ runit_service_dir: /etc/service/      # the default service directory that is be
 Also a task to setup runit services in various other roles, similar to Chef LWRP runit_service.
 The task that takes runit_scaffold_name, runit_scaffold_owner, runit_scaffold_run_content. It then:
 
-1) Creates a log directory in /var/log/$runit_scaffold_name
-2) Sets up /etc/sv/$runit_scaffold_name/log/run to log to /var/log/$runit_scaffold_name
-3) Takes the content of runit_scaffold_content and puts it into /etc/sv/$runit_scaffold_name/run
-4) Links /etc/sv/$runit_scaffold_name to /etc/service
+* Creates a log directory in /var/log/$runit_scaffold_name
+* Sets up /etc/sv/$runit_scaffold_name/log/run to log to /var/log/$runit_scaffold_name
+* Takes the content of runit_scaffold_content and puts it into /etc/sv/$runit_scaffold_name/run
+* Links /etc/sv/$runit_scaffold_name to /etc/service
+
+Note that notifies on includes don't work yet and we'll need an extra task to restart
+https://groups.google.com/forum/#!topic/ansible-project/Lhr0mqm91TQ
 
 ```
 - include: ../../runit/tasks/scaffold.yml
@@ -28,5 +31,13 @@ The task that takes runit_scaffold_name, runit_scaffold_owner, runit_scaffold_ru
         exec 2>&1
         ulimit -n 8192
         exec chpst -u {{ runit_scaffold_owner }} /usr/local/bin/yourservice
+
+# Note that notify on include doesn't work yet
+# https://groups.google.com/forum/#!topic/ansible-project/Lhr0mqm91TQ
+- name: Restart if changed
+  shell: echo "Restarting..."
+  notify: restart_your_service
+  when: runit_scaffold_changed.changed == true
+
 
 ```
