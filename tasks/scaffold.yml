@@ -1,0 +1,28 @@
+# This is a task that takes runit_scaffold_name, runit_scaffold_owner, runit_scaffold_run_content. It then:
+# 1) Creates a log directory in /var/log/$runit_scaffold_name
+# 2) Sets up /etc/sv/$runit_scaffold_name/log/run to log to /var/log/$runit_scaffold_name
+# 3) Takes the content of runit_scaffold_content and puts it into /etc/sv/$runit_scaffold_name/run
+# 4) Links /etc/sv/$runit_scaffold_name to /etc/service
+
+- debug: msg="Setting up {{ runit_scaffold_name }} with owner {{ runit_scaffold_owner }}"
+
+- name: Create runit dir {{ runit_scaffold_name }}
+  file: dest={{ runit_sv_dir }}/{{ runit_scaffold_name }}/log state=directory mode=0755 recurse=true
+  tags: runit_scaffold
+
+- name: Create runit log destination dir for {{ runit_scaffold_name }}
+  file: dest=/var/log/{{ runit_scaffold_name }} state=directory mode=0755 recurse=true owner={{ runit_scaffold_owner }}
+  tags: runit_scaffold
+
+- name: Create runit log run file {{ runit_scaffold_name }}
+  copy: dest={{ runit_sv_dir }}/{{ runit_scaffold_name }}/log/run mode=0755 content="#!/bin/sh\nexec svlogd -tt /var/log/{{ runit_scaffold_name }}\n"
+  tags: runit_scaffold
+
+- name: Create runit run file {{ runit_scaffold_name }}
+  copy: dest={{ runit_sv_dir }}/{{ runit_scaffold_name }}/run mode=0755 content="{{ runit_scaffold_run_content }}\n"
+  tags: runit_scaffold
+
+- name: Link runit {{ runit_scaffold_name }} to /etc/service/
+  file: src={{ runit_sv_dir }}/{{ runit_scaffold_name }} dest=/etc/service/{{ runit_scaffold_name }} state=link
+  tags: runit_scaffold
+
