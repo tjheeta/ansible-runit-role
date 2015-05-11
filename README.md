@@ -11,6 +11,7 @@ runit_service_dir: /etc/service/      # the default service directory that is be
 
 Also a task to setup runit services in various other roles, similar to Chef LWRP runit_service.
 The task that takes runit_scaffold_name, runit_scaffold_owner, runit_scaffold_run_content. It then:
+
 1) Creates a log directory in /var/log/$runit_scaffold_name
 2) Sets up /etc/sv/$runit_scaffold_name/log/run to log to /var/log/$runit_scaffold_name
 3) Takes the content of runit_scaffold_content and puts it into /etc/sv/$runit_scaffold_name/run
