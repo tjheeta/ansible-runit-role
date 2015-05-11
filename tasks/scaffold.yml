@@ -21,7 +21,11 @@
 # https://groups.google.com/forum/#!topic/ansible-project/Lhr0mqm91TQ
 # No notify logic attached to include, so have to manually check if changed
 - name: Create runit run file {{ runit_scaffold_name }}
-  copy: dest={{ runit_sv_dir }}/{{ runit_scaffold_name }}/run mode=0755 content="{{ runit_scaffold_run_content }}\n"
+  copy:
+    dest: "{{ runit_sv_dir }}/{{ runit_scaffold_name }}/run"
+    mode: 0755
+    content: "{{ runit_scaffold_run_content }}"
+
   register: runit_scaffold_changed
   tags: runit_scaffold
 
