@@ -1,0 +1,60 @@
+- file: path={{ runit_binary_dir }} mode=0755 state=directory
+- file: path={{ runit_service_dir }} mode=0755 state=directory
+- file: path={{ runit_sv_dir }} mode=0755 state=directory
+- file: dest=/service src={{ runit_service_dir }} state=link
+  when: runit_service_dir != "/service"
+
+# assumes that the localhost has a compiler to make runit statically
+- include: compile.yml
+  when: not runit_use_precompiled_binary
+  sudo: false
+
+- unarchive: src={{ runit_build }}/runit-{{ ansible_architecture }}.tar.gz dest={{ runit_binary_dir }} mode=0755
+             creates={{ runit_binary_dir }}/runsv
+  when: not runit_use_precompiled_binary
+- unarchive: src=runit-{{ ansible_architecture }}.tar.gz dest={{ runit_binary_dir }} mode=0755
+             creates={{ runit_binary_dir }}/runsv
+  when: runit_use_precompiled_binary
+
+# Have to setup the runit startup
+- template: dest={{ runit_binary_dir }}/runsvdir-start src=runsvdir-start.j2 mode=0755
+- shell: cd {{ runit_binary_dir }} && chown root:root chpst runit runit-init runsv runsvchdir runsvdir runsvdir-start sv svlogd utmpset
+
+
+# Check if it's systemd 
+
+# Check if it's upstart - /etc/init/
+- stat: path=/etc/init get_md5=no get_checksum=no
+  register: st
+  tags: startup
+- debug: var=st.stat.isdir
+  tags: startup
+- template: dest=/etc/init/runsvdir-start.conf src=upstart-runsvdir-start.conf.j2
+  when: st.stat.isdir is defined
+  tags: startup
+- service: name=runsvdir-start state=started
+  sudo: true
+  when: st.stat.isdir is defined
+  tags: startup
+
+
+#- lineinfile: dest=/etc/rc.local regexp='runsvdir-start' insertafter=EOF line="sh -cf '{{ runit_binary_dir }}/runsvdir-start' &"
+#  when: st.stat.isdir is not defined
+#  tags: startup
+
+
+
+- shell: pgrep runsvdir-start 
+  register: pgrep_status
+  ignore_errors: true
+  when: st.stat.isdir is not defined
+  tags: startup
+
+- debug: var=pgrep_status
+  tags: startup
+
+#- shell: |
+#         setsid "{{ runit_binary_dir }}/runsvdir-start"
+#         disown !$
+#  when: pgrep_status.rc == 1
+#  tags: test
