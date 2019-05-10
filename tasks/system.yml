@@ -1,5 +1,5 @@
 - apt: name={{ item }} state=present
-  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version | int >= 16
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_version | int >= 18
   with_items:
     - runit
     - runit-systemd
